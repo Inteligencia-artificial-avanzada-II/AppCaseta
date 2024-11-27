@@ -1,14 +1,15 @@
-import { React, useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Acomodar } from "../services/AcomodarService";
 
 const OrderScreen = ({ navigation }) => {
   const [orderId, setOrderId] = useState("");
   const [origen, setOrigen] = useState("");
 
   useEffect(() => {
-    const fetchOrderId = async () => {
+    const fetchOrderData = async () => {
       try {
         const sqlData = await AsyncStorage.getItem("sqlData");
         if (sqlData) {
@@ -16,25 +17,68 @@ const OrderScreen = ({ navigation }) => {
           setOrderId(parsedData.idOrden);
           setOrigen(parsedData.origen);
         } else {
-          console.error("No se encontro sqlData en AsyncStorage");
+          console.error("No se encontró sqlData en AsyncStorage");
         }
       } catch (error) {
         console.error("Error al obtener el idOrden: ", error);
       }
     };
-    fetchOrderId();
+    fetchOrderData();
   }, []);
+
+  const handleAcomodar = async () => {
+    try {
+      const idContenedor = JSON.parse(
+        await AsyncStorage.getItem("idContenedor")
+      );
+      console.log("idContenedor:", idContenedor);
+
+      if (!idContenedor) {
+        console.error("Faltan datos en AsyncStorage");
+        Alert.alert(
+          "Error",
+          "No se encontraron los datos necesarios. Por favor, intente escanear el código QR nuevamente.",
+          [{ text: "OK", onPress: () => navigation.navigate("QRScan") }]
+        );
+        return;
+      }
+
+      const date = new Date();
+      const offsetInMinutes = date.getTimezoneOffset(); // Obtiene el desfase en minutos respecto a UTC
+      const localDateTime = new Date(
+        date.getTime() - offsetInMinutes * 60000
+      ).toISOString();
+      const response = await Acomodar(idContenedor, localDateTime);
+
+      console.log("Respuesta de Acomodar:", response);
+
+      if (response.puerta && response.puerta.number) {
+        // Si hay una puerta asignada, navega a ParkedScreen con el número de puerta
+        navigation.navigate("Parked", {
+          message: `Camion acomodado en puerta ${response.puerta.number}`,
+        });
+      } else {
+        // Si no hay puerta asignada, muestra mensaje de espera
+        navigation.navigate("Parked", {
+          message: "Camion en espera de asignación de puerta",
+        });
+      }
+    } catch (error) {
+      console.error("Error en handleAcomodar:", error);
+      Alert.alert("Error", "No se pudo acomodar, intente de nuevo.", [
+        { text: "OK", onPress: () => navigation.navigate("QRScan") },
+      ]);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      {/* Contenedor para el título y el número de orden */}
       <View style={styles.headerContainer}>
         <Text style={styles.title}>Orden</Text>
         <Text style={styles.orderNumber}># {orderId}</Text>
       </View>
 
       <View style={styles.itemContainer}>
-        {/* Botón con icono y texto "Origen" */}
         <TouchableOpacity style={styles.item}>
           <View style={styles.iconContainer}>
             <Ionicons
@@ -43,7 +87,6 @@ const OrderScreen = ({ navigation }) => {
               color="#fff"
               style={styles.icon}
             />
-            {/* Icono de documento */}
           </View>
           <Text style={styles.itemText}>{origen}</Text>
         </TouchableOpacity>
@@ -64,11 +107,15 @@ const OrderScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("Parked")}
-      >
+      <TouchableOpacity style={styles.button} onPress={handleAcomodar}>
         <Text style={styles.buttonText}>Acomodar</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.secondaryButton}
+        onPress={() => navigation.navigate("QRScan")}
+      >
+        <Text style={styles.secondaryButtonText}>Leer otro código QR</Text>
       </TouchableOpacity>
     </View>
   );
@@ -130,6 +177,21 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  secondaryButton: {
+    position: "absolute",
+    bottom: 40,
+    backgroundColor: "#ccc",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    width: "80%",
+    alignSelf: "center",
+  },
+  secondaryButtonText: {
+    color: "#000",
     fontSize: 16,
     fontWeight: "bold",
   },

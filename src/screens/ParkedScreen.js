@@ -1,7 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 
-const ParkedScreen = ({ navigation }) => {
+const ParkedScreen = ({ route, navigation }) => {
+  const { message } = route.params; // Obtiene el mensaje pasado desde la navegación
+
   return (
     <View style={styles.container}>
       {/* Icono de éxito */}
@@ -10,13 +12,13 @@ const ParkedScreen = ({ navigation }) => {
         style={styles.icon}
       />
 
-      {/* Texto indicando que el camión ha sido descargado */}
-      <Text style={styles.title}>Camion Acomodado</Text>
+      {/* Texto dinámico */}
+      <Text style={styles.title}>{message}</Text>
 
-      {/* Botón para regresar al login */}
+      {/* Botón para regresar al escaneo */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("QRScan")} // Cambia "Login" por la pantalla a la que quieres navegar
+        onPress={() => navigation.navigate("QRScan")} // Cambia "QRScan" según sea necesario
       >
         <Text style={styles.buttonText}>Inicio</Text>
       </TouchableOpacity>
@@ -42,6 +44,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#000",
     marginBottom: 20,
+    textAlign: "center",
   },
   button: {
     backgroundColor: "#0033cc",

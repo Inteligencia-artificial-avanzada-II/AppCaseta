@@ -12,9 +12,11 @@ export const fetchOrderData = async (data, userToken) => {
 
     const products = response.data.data.mongoData.products;
     const sqlData = response.data.data.sqlData;
+    const idContenedor = sqlData.idContenedor;
 
     await AsyncStorage.setItem("sqlData", JSON.stringify(sqlData));
     await AsyncStorage.setItem("products", JSON.stringify(products));
+    await AsyncStorage.setItem("idContenedor", JSON.stringify(idContenedor));
 
     return response.data.data;
   } catch (error) {
