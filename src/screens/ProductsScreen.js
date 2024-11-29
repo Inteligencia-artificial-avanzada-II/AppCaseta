@@ -2,37 +2,39 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
   Alert,
   TouchableOpacity,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Manejo de almacenamiento local
+import { Ionicons } from "@expo/vector-icons"; // Íconos para mejorar la interfaz
 
 const ProductsScreen = ({ navigation }) => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([]); // Estado para almacenar la lista de productos
 
+  // Carga los productos almacenados en AsyncStorage al montar el componente
   useEffect(() => {
     const loadProducts = async () => {
       try {
         const storedProducts = await AsyncStorage.getItem("products");
         if (storedProducts) {
-          setProducts(JSON.parse(storedProducts));
+          setProducts(JSON.parse(storedProducts)); // Convierte los productos en un objeto y actualiza el estado
         } else {
-          Alert.alert("Error", "No se encontraron productos almacenados.");
+          Alert.alert("Error", "No se encontraron productos almacenados."); // Alerta si no hay productos
         }
       } catch (error) {
-        console.error("Error al cargar los productos: ", error);
-        Alert.alert("Error", "Hubo un problema al cargar los productos.");
+        console.error("Error al cargar los productos: ", error); // Log de error
+        Alert.alert("Error", "Hubo un problema al cargar los productos."); // Alerta en caso de error
       }
     };
 
     loadProducts();
   }, []);
 
+  // Renderiza cada producto en la lista
   const renderItem = ({ item, index }) => (
     <View style={styles.item}>
+      {/* Ícono con color alternado según el índice del producto */}
       <View
         style={[
           styles.iconContainer,
@@ -41,7 +43,9 @@ const ProductsScreen = ({ navigation }) => {
       >
         <Ionicons name="cube" size={20} color="#fff"></Ionicons>
       </View>
+      {/* Descripción del producto */}
       <Text style={styles.itemText}>{item.itemDescription}</Text>
+      {/* Cantidad solicitada y unidad de medida */}
       <View style={styles.quantityContainer}>
         <Text style={styles.quantityText}>{item.requestedQuantity}</Text>
         <Text style={styles.unitText}>{item.unitOfMeasure}</Text>
@@ -51,9 +55,10 @@ const ProductsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* Cabecera con botón para regresar y título */}
       <View style={styles.headerContainer}>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.goBack()} // Navega hacia atrás
           style={styles.backButton}
         >
           <Ionicons name="arrow-undo-circle" size={35} color="#0033cc" />
@@ -61,81 +66,15 @@ const ProductsScreen = ({ navigation }) => {
         <Text style={styles.title}>Products</Text>
       </View>
 
+      {/* Lista de productos utilizando FlatList */}
       <FlatList
-        data={products}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={styles.itemContainer}
+        data={products} // Datos de la lista
+        keyExtractor={(item, index) => index.toString()} // Clave única para cada elemento
+        renderItem={renderItem} // Componente que renderiza cada producto
+        contentContainerStyle={styles.itemContainer} // Estilo para el contenedor
       />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    padding: 20,
-  },
-  headerContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 40,
-    marginTop: 50,
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#0033cc",
-  },
-  itemContainer: {
-    paddingBottom: 50,
-  },
-  item: {
-    backgroundColor: "#f5f5f5",
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 15,
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  iconContainer: {
-    backgroundColor: "#0033cc",
-    borderRadius: 50,
-    padding: 10,
-    marginRight: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 18,
-  },
-  quantityContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  itemText: {
-    fontSize: 18,
-    flex: 1,
-  },
-  quantityText: {
-    fontSize: 16,
-    color: "#555",
-    marginRight: 5,
-  },
-  unitText: {
-    fontSize: 16,
-    color: "#555",
-  },
-  backButton: {
-    marginRight: 10,
-    position: "absolute",
-    left: 0,
-  },
-});
-
-export default ProductsScreen;
+export default ProductsScreen; // Exporta el componente para su uso en otras partes de la app

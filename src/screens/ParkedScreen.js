@@ -2,23 +2,24 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 
 const ParkedScreen = ({ route, navigation }) => {
-  const { message } = route.params; // Obtiene el mensaje pasado desde la navegación
+  // Extrae el mensaje pasado como parámetro desde la pantalla anterior
+  const { message } = route.params;
 
   return (
     <View style={styles.container}>
       {/* Icono de éxito */}
       <Image
-        source={require("../assets/OK.png")} // Asegúrate de tener el icono correcto en tu carpeta de assets
+        source={require("../assets/OK.png")} // Ruta del icono de confirmación
         style={styles.icon}
       />
 
-      {/* Texto dinámico */}
+      {/* Muestra el mensaje dinámico recibido como parámetro */}
       <Text style={styles.title}>{message}</Text>
 
-      {/* Botón para regresar al escaneo */}
+      {/* Botón para regresar a la pantalla de escaneo QR */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("QRScan")} // Cambia "QRScan" según sea necesario
+        onPress={() => navigation.navigate("QRScan")} // Navega a la pantalla de escaneo QR
       >
         <Text style={styles.buttonText}>Inicio</Text>
       </TouchableOpacity>
@@ -62,4 +63,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ParkedScreen;
+export default ParkedScreen; // Exporta el componente para ser utilizado en otras partes de la app
